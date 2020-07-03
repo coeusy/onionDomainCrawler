@@ -8,6 +8,7 @@ class SearchEngine:
         self._session = requests.session()
         self._initialize()
         self.url = None
+        self.name = None
 
     def _initialize(self):
         self._session.proxies = {
@@ -18,30 +19,30 @@ class SearchEngine:
     def search(self, keyword: str):
         pass
 
-    def _get(self, url, retry=5, timeout=60):
+    def _get(self, url, params, retry=5, timeout=60):
         tried = 0
         while tried < retry:
             try:
-                resp = self._session.get(url, timeout=timeout)
+                resp = self._session.get(url, timeout=timeout, params=params)
                 if resp.status_code == 200:
                     return resp
                 else:
                     tried += 1
             except requests.exceptions.ReadTimeout:
                 tried += 1
-        print(self.url, " fail to get ", url)
+        print(self.name, " fail to get ", url, params)
         return None
 
-    @staticmethod
-    def _parse(page_source, collector: set):
+    def _parse(self, page_source, collector: set):
         try:
             soup = BeautifulSoup(page_source, features="lxml")
             for a in soup.find_all("a"):
                 if a.has_attr("href"):
                     href = a['href'].replace("%2F", "/").replace("%3A", ":")
-                    res = re.search("(http|https)://[a-zA-Z0-9]+.onion", href)
+                    res = re.search(r"https?://[a-zA-Z0-9]+.onion", href)
                     if res:
-                        print(res.group())
-                        collector.add(res.group())
+                        if res.group not in collector:
+                            print(self.name, res.group())
+                            collector.add(res.group())
         except Exception as e:
             print(e)

@@ -35,9 +35,9 @@ class SearchEngine:
     @staticmethod
     def _parse(page_source, collector: set):
         try:
-            soup = BeautifulSoup(page_source, parser="lxml")
+            soup = BeautifulSoup(page_source, features="lxml")
             for a in soup.find_all("a"):
-                if a.has_key("href"):
+                if a.has_attr("href"):
                     href = a['href'].replace("%2F", "/").replace("%3A", ":")
                     res = re.search("(http|https)://[a-zA-Z0-9]+.onion", href)
                     if res:

@@ -28,8 +28,11 @@ class NotEvilSearch(SearchEngine):
         super().__init__()
         self.url = "http://hss3uro2hsxfogfq.onion"
         self.name = "not Evil"
+        self._session_id = self._get_session_id()
 
     def search(self, keyword: str):
+        if len(keyword) < 4:
+            return
         collector = set()
         search_url = f"{self.url}/index.php"
         params = {
@@ -37,7 +40,7 @@ class NotEvilSearch(SearchEngine):
             "hostLimit": 20,
             "numRows": 20,
             "template": 0,
-            "session": self._get_session_id()
+            "session": self._session_id
         }
         for i in range(100):
             params["start"] = params["numRows"] * 20
@@ -55,7 +58,7 @@ class NotEvilSearch(SearchEngine):
 class AhmiaSearch(SearchEngine):
     def __init__(self):
         super().__init__()
-        self.url = "http://msydqstlz2kzerdg.onion/"
+        self.url = "http://msydqstlz2kzerdg.onion"
         self.name = "Ahmia"
 
     def search(self, keyword: str):

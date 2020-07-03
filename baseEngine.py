@@ -41,8 +41,8 @@ class SearchEngine:
                     href = a['href'].replace("%2F", "/").replace("%3A", ":")
                     res = re.search(r"https?://[a-zA-Z0-9]+.onion", href)
                     if res:
-                        if res.group not in collector:
-                            print(self.name, res.group())
+                        if res.group() not in collector:
+                            print(self.name, res.group(), len(collector))
                             collector.add(res.group())
         except Exception as e:
             print(e)

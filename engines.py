@@ -8,7 +8,6 @@ class TorchSearch(SearchEngine):
         self.name = "Torch"
 
     def _search(self, keyword: str, collector: set):
-        collector = set()
         search_url = f"{self.url}/4a1f6b371c/search.cgi"
         params = {
             "s": "DRP",
@@ -21,7 +20,6 @@ class TorchSearch(SearchEngine):
             if "No documents were found containing" in resp.text:
                 break
             self._parse(resp.text, collector)
-        print(self.name, keyword, len(collector))
 
 
 class NotEvilSearch(SearchEngine):
@@ -34,7 +32,6 @@ class NotEvilSearch(SearchEngine):
     def _search(self, keyword: str, collector: set):
         if len(keyword) < 4:
             return
-        collector = set()
         search_url = f"{self.url}/index.php"
         params = {
             "q": keyword,
@@ -47,7 +44,6 @@ class NotEvilSearch(SearchEngine):
             params["start"] = params["numRows"] * 20
             resp = self._get(search_url, params=params)
             self._parse(resp.text, collector)
-        print(self.name, keyword, len(collector))
 
     def _get_session_id(self):
         resp = self._get(self.url, params=None)
@@ -64,14 +60,12 @@ class AhmiaSearch(SearchEngine):
         self.name = "Ahmia"
 
     def _search(self, keyword: str, collector: set):
-        collector = set()
         search_url = f"{self.url}/search"
         params = {
             "q": keyword
         }
         resp = self._get(search_url, params=params)
         self._parse(resp.text, collector)
-        print(self.name, keyword, len(collector))
 
 
 class HaystakSearch(SearchEngine):

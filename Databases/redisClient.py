@@ -2,8 +2,13 @@ import redis
 
 
 class RedisClient:
-    def __init__(self):
-        self.client = redis.Redis("81.68.126.91", port=63790, db=1)
+    def __init__(self, host, port: int, db: int = 0):
+        self.client = redis.Redis(host, port=port, db=db)
+        self.ping()
+
+    def ping(self):
+        if not self.client.ping():
+            raise redis.exceptions.ConnectionError
 
     def add_domain(self, domain):
         self.client.sadd("darkweb_domain", domain)

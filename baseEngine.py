@@ -1,11 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
 import re
+from Databases.redisClient import RedisClient
 
 
 class SearchEngine:
-    def __init__(self):
+    def __init__(self, redis_client: RedisClient):
         self._session = requests.session()
+        self.redis_client = redis_client
         self._initialize()
         self.url = None
         self.name = None
@@ -16,7 +18,17 @@ class SearchEngine:
             "https": "socks5h://127.0.0.1:9050"
         }
 
-    def search(self, keyword: str):
+    def search(self, keyword):
+        collector = set()
+        self._search(keyword, collector)
+        print(self.name, keyword, len(collector))
+        self._save(collector)
+
+    def _save(self, collector):
+        for domain in collector:
+            self.redis_client.add_domain(domain)
+
+    def _search(self, keyword: str, collector: set):
         pass
 
     def _get(self, url, params, retry=5, timeout=60):
@@ -33,7 +45,8 @@ class SearchEngine:
         print(self.name, " fail to get ", url, params)
         return None
 
-    def _parse(self, page_source, collector: set):
+    @staticmethod
+    def _parse(page_source, collector: set):
         try:
             soup = BeautifulSoup(page_source, features="lxml")
             for a in soup.find_all("a"):
@@ -42,7 +55,10 @@ class SearchEngine:
                     res = re.search(r"https?://[a-zA-Z0-9]+.onion", href)
                     if res:
                         if res.group() not in collector:
-                            print(self.name, res.group(), len(collector))
                             collector.add(res.group())
         except Exception as e:
             print(e)
+
+    def run(self, keywords):
+        for keyword in keywords():
+            self.search(keyword)

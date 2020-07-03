@@ -2,12 +2,12 @@ from baseEngine import *
 
 
 class TorchSearch(SearchEngine):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, redis_client: RedisClient):
+        super().__init__(redis_client)
         self.url = "http://xmh57jrzrnw6insl.onion"
         self.name = "Torch"
 
-    def search(self, keyword: str):
+    def _search(self, keyword: str, collector: set):
         collector = set()
         search_url = f"{self.url}/4a1f6b371c/search.cgi"
         params = {
@@ -21,16 +21,17 @@ class TorchSearch(SearchEngine):
             if "No documents were found containing" in resp.text:
                 break
             self._parse(resp.text, collector)
+        print(self.name, keyword, len(collector))
 
 
 class NotEvilSearch(SearchEngine):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, redis_client: RedisClient):
+        super().__init__(redis_client)
         self.url = "http://hss3uro2hsxfogfq.onion"
         self.name = "not Evil"
         self._session_id = self._get_session_id()
 
-    def search(self, keyword: str):
+    def _search(self, keyword: str, collector: set):
         if len(keyword) < 4:
             return
         collector = set()
@@ -40,15 +41,16 @@ class NotEvilSearch(SearchEngine):
             "hostLimit": 20,
             "numRows": 20,
             "template": 0,
-            "session": self._session_id
+            "session": self._session_id,
         }
         for i in range(100):
             params["start"] = params["numRows"] * 20
             resp = self._get(search_url, params=params)
             self._parse(resp.text, collector)
+        print(self.name, keyword, len(collector))
 
     def _get_session_id(self):
-        resp = self._get(self.url, params={})
+        resp = self._get(self.url, params=None)
         soup = BeautifulSoup(resp.text, features="lxml")
         for element in soup.find_all("input"):
             if element.attrs['name'] == "session":
@@ -56,12 +58,12 @@ class NotEvilSearch(SearchEngine):
 
 
 class AhmiaSearch(SearchEngine):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, redis_client: RedisClient):
+        super().__init__(redis_client)
         self.url = "http://msydqstlz2kzerdg.onion"
         self.name = "Ahmia"
 
-    def search(self, keyword: str):
+    def _search(self, keyword: str, collector: set):
         collector = set()
         search_url = f"{self.url}/search"
         params = {
@@ -69,16 +71,16 @@ class AhmiaSearch(SearchEngine):
         }
         resp = self._get(search_url, params=params)
         self._parse(resp.text, collector)
+        print(self.name, keyword, len(collector))
 
 
 class HaystakSearch(SearchEngine):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, redis_client: RedisClient):
+        super().__init__(redis_client)
         self.url = "http://haystakvxad7wbk5.onion"
         self.name = "Haystak"
 
-    def search(self, keyword: str):
-        collector = set()
+    def _search(self, keyword: str, collector: set):
         search_url = self.url
         params = {
             "q": keyword
@@ -87,3 +89,4 @@ class HaystakSearch(SearchEngine):
             params["offset"] = i * 20
             resp = self._get(search_url, params=params)
             self._parse(resp.text, collector)
+

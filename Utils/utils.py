@@ -6,6 +6,8 @@ root_path = os.path.dirname(os.path.dirname(__file__))
 def load_keywords():
     collector = set()
     for filename in os.listdir(os.path.join(root_path, "keywords")):
+        if filename.startswith("."):
+            continue
         fr = open(os.path.join(root_path, "keywords", filename), "r")
         for line in fr.readlines():
             collector.add(line.strip())

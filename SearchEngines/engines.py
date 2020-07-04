@@ -3,9 +3,8 @@ from .base.baseEngine import *
 
 class TorchSearch(SearchEngine):
     def __init__(self, redis_client: RedisClient):
-        super().__init__(redis_client)
+        super().__init__(redis_client, "Torch")
         self.url = "http://xmh57jrzrnw6insl.onion"
-        self.name = "Torch"
 
     def _search(self, keyword: str, collector: set):
         search_url = f"{self.url}/4a1f6b371c/search.cgi"
@@ -24,9 +23,8 @@ class TorchSearch(SearchEngine):
 
 class NotEvilSearch(SearchEngine):
     def __init__(self, redis_client: RedisClient):
-        super().__init__(redis_client)
+        super().__init__(redis_client, "notEvil")
         self.url = "http://hss3uro2hsxfogfq.onion"
-        self.name = "not Evil"
         self._session_id = self._get_session_id()
 
     def _search(self, keyword: str, collector: set):
@@ -55,9 +53,8 @@ class NotEvilSearch(SearchEngine):
 
 class AhmiaSearch(SearchEngine):
     def __init__(self, redis_client: RedisClient):
-        super().__init__(redis_client)
+        super().__init__(redis_client, "Ahmia")
         self.url = "http://msydqstlz2kzerdg.onion"
-        self.name = "Ahmia"
 
     def _search(self, keyword: str, collector: set):
         search_url = f"{self.url}/search"
@@ -70,9 +67,8 @@ class AhmiaSearch(SearchEngine):
 
 class HaystakSearch(SearchEngine):
     def __init__(self, redis_client: RedisClient):
-        super().__init__(redis_client)
+        super().__init__(redis_client, "Haystak")
         self.url = "http://haystakvxad7wbk5.onion"
-        self.name = "Haystak"
 
     def _search(self, keyword: str, collector: set):
         search_url = self.url

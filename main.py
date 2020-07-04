@@ -1,7 +1,7 @@
 from SearchEngines.engines import *
 from multiprocessing import Process
 from Databases.redisClient import RedisClient
-cfg = ConfigLoader().config_dict
+cfg = ConfigLoader().config_dict['main']
 
 
 if __name__ == '__main__':
@@ -11,7 +11,7 @@ if __name__ == '__main__':
     ahmia = AhmiaSearch(redis)
     not_evil = NotEvilSearch(redis)
     processes = []
-    for engine in [torch, haystak, ahmia, not_evil]:
+    for engine in [torch, haystak, not_evil]:
         p = Process(target=engine.run)
         p.start()
         processes.append(p)

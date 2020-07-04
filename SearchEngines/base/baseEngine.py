@@ -14,13 +14,13 @@ cfg = ConfigLoader().config_dict['main']
 
 
 class SearchEngine:
-    def __init__(self, redis_client: RedisClient):
+    def __init__(self, redis_client: RedisClient, name):
         self._session = requests.session()
         self.redis_client = redis_client
+        self.name = name
         self.tasks = set()
         self._initialize()
         self.url = None
-        self.name = None
 
     def _initialize(self):
         self._session.proxies = {
@@ -65,7 +65,7 @@ class SearchEngine:
             except Exception as e:
                 logger.error(e)
                 tried += 1
-        logger.warning(self.name, " fail to get ", url, params)
+        logger.warning(f"{self.name} fail to get {url} with params {params}")
         return None
 
     @staticmethod
@@ -106,3 +106,4 @@ class SearchEngine:
             self.tasks = pickle.load(open(middle_filename, "rb"))
         else:
             self.tasks = load_keywords()
+        logger.info(f"{self.name} load tasks successully, totally {len(self.tasks)}")

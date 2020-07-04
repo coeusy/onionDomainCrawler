@@ -3,7 +3,7 @@ import redis
 
 class RedisClient:
     def __init__(self, host, port: int, db: int):
-        self.client = redis.Redis(host, port=port, db=db)
+        self.client = redis.Redis(host, port=port, db=db, decode_responses=True)
         self.ping()
 
     def ping(self):

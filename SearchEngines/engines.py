@@ -18,7 +18,8 @@ class TorchSearch(SearchEngine):
             resp = self._get(search_url, params=params)
             if "No documents were found containing" in resp.text:
                 break
-            self._parse(resp.text, collector)
+            if resp:
+                self._parse(resp.text, collector)
 
 
 class NotEvilSearch(SearchEngine):
@@ -37,11 +38,13 @@ class NotEvilSearch(SearchEngine):
             "numRows": 20,
             "template": 0,
             "session": self._session_id,
+            "start": 0
         }
         for i in range(10):
             params["start"] = params["numRows"] * i
             resp = self._get(search_url, params=params)
-            self._parse(resp.text, collector)
+            if resp:
+                self._parse(resp.text, collector)
 
     def _get_session_id(self):
         resp = self._get(self.url, params=None)
@@ -62,7 +65,8 @@ class AhmiaSearch(SearchEngine):
             "q": keyword
         }
         resp = self._get(search_url, params=params)
-        self._parse(resp.text, collector)
+        if resp:
+            self._parse(resp.text, collector)
 
 
 class HaystakSearch(SearchEngine):
@@ -78,5 +82,6 @@ class HaystakSearch(SearchEngine):
         for i in range(10):
             params["offset"] = i * 20
             resp = self._get(search_url, params=params)
-            self._parse(resp.text, collector)
+            if resp:
+                self._parse(resp.text, collector)
 

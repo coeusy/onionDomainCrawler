@@ -39,12 +39,11 @@ class SearchEngine:
             logger.error(format_exc())
             return False, keyword
         finally:
-            logger.info(f"{self.name} get {len(collector)} onions from {keyword}")
-            self._save(collector)
+            saved = self._save(collector)
+            logger.info(f"{self.name} get {len(collector)} onions from {keyword}, {saved} of them are distinct")
 
     def _save(self, collector):
-        for domain in collector:
-            self.redis_client.add_domain(domain)
+        return self.redis_client.add_domain(collector)
 
     def _search(self, keyword: str, collector: set):
         pass
@@ -96,8 +95,9 @@ class SearchEngine:
         except Exception as e:
             logger.error(e)
             logger.error(format_exc())
-        pool.shutdown()
-        self.dump_middle_status()
+        finally:
+            pool.shutdown()
+            self.dump_middle_status()
 
     def dump_middle_status(self):
         dump_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "temp")

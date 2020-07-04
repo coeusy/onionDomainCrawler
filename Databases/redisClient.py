@@ -12,6 +12,6 @@ class RedisClient:
 
     def add_domain(self, collector):
         if len(collector) > 0:
-            return self.client.sadd("darkweb_domain", *list(collector))
+            return self.client.sadd("darkweb_domain", *collector)
         else:
             return 0

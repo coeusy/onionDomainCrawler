@@ -39,7 +39,7 @@ class SearchEngine:
             logger.error(format_exc())
             return False, keyword
         finally:
-            logger.info(self.name, keyword, len(collector))
+            logger.info(f"{self.name} get {len(collector)} onions from {keyword}")
             self._save(collector)
 
     def _save(self, collector):
@@ -112,4 +112,4 @@ class SearchEngine:
             self.tasks = pickle.load(open(middle_filename, "rb"))
         else:
             self.tasks = load_keywords()
-        logger.info(f"{self.name} load tasks successully, totally {len(self.tasks)}")
+        logger.info(f"{self.name} load tasks successfully, totally {len(self.tasks)}")

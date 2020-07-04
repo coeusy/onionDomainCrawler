@@ -42,6 +42,11 @@ class SearchEngine:
                     tried += 1
             except requests.exceptions.ReadTimeout:
                 tried += 1
+            except requests.exceptions.ConnectionError:
+                tried += 1
+            except Exception as e:
+                print(e)
+                tried += 1
         print(self.name, " fail to get ", url, params)
         return None
 

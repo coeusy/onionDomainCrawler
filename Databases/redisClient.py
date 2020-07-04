@@ -2,7 +2,7 @@ import redis
 
 
 class RedisClient:
-    def __init__(self, host, port: int, db: int = 0):
+    def __init__(self, host, port: int, db: int):
         self.client = redis.Redis(host, port=port, db=db)
         self.ping()
 

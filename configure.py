@@ -1,5 +1,5 @@
 REDIS = {
-    "host": "your host",
-    "port": 3306,
-    "db": 0
+    "host": "127.0.0.1",
+    "port": 6379,
+    "db": 1
 }

@@ -1,7 +1,7 @@
 from engines import *
 from Utils.utils import load_keywords
 from configure import *
-from threading import Thread
+from multiprocessing import Process
 
 
 if __name__ == '__main__':
@@ -13,7 +13,7 @@ if __name__ == '__main__':
     # torch.search(".onion")
     threads = []
     for engine in [torch, haystak, ahmia, not_evil]:
-        t = Thread(target=engine.run, args=(load_keywords,))
+        t = Process(target=engine.run, args=(load_keywords,))
         t.start()
         threads.append(t)
     for t in threads:

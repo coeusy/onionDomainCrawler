@@ -40,8 +40,8 @@ class NotEvilSearch(SearchEngine):
             "template": 0,
             "session": self._session_id,
         }
-        for i in range(100):
-            params["start"] = params["numRows"] * 20
+        for i in range(20):
+            params["start"] = params["numRows"] * i
             resp = self._get(search_url, params=params)
             self._parse(resp.text, collector)
 
@@ -79,7 +79,7 @@ class HaystakSearch(SearchEngine):
         params = {
             "q": keyword
         }
-        for i in range(500):
+        for i in range(20):
             params["offset"] = i * 20
             resp = self._get(search_url, params=params)
             self._parse(resp.text, collector)

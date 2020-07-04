@@ -11,4 +11,4 @@ class RedisClient:
             raise redis.exceptions.ConnectionError
 
     def add_domain(self, collector):
-        return self.client.sadd("darkweb_domain", collector)
+        return self.client.sadd("darkweb_domain", list(collector))

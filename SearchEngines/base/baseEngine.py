@@ -7,7 +7,7 @@ from Utils.config_loader import ConfigLoader
 from Utils.logger import Log
 from Utils.utils import load_keywords
 from traceback import format_exc
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import pickle
 logger = Log().get_log()
 cfg = ConfigLoader().config_dict['main']
@@ -33,11 +33,11 @@ class SearchEngine:
         collector = set()
         try:
             self._search(keyword, collector)
-            return True
+            return True, keyword
         except Exception as e:
             logger.error(e)
             logger.error(format_exc())
-            return False
+            return False, keyword
         finally:
             logger.info(self.name, keyword, len(collector))
             self._save(collector)
@@ -84,13 +84,19 @@ class SearchEngine:
 
     def run(self):
         pool = ThreadPoolExecutor(max_workers=4)
+        futures = []
         try:
             while len(self.tasks):
                 keyword = self.tasks.pop()
-                pool.submit(self.search, keyword)
+                futures.append(pool.submit(self.search, keyword))
+            for future in as_completed(futures):
+                res = future.result()
+                if not res[0]:
+                    self.tasks.add(res[1])
         except Exception as e:
             logger.error(e)
             logger.error(format_exc())
+        pool.shutdown()
         self.dump_middle_status()
 
     def dump_middle_status(self):

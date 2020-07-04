@@ -1,11 +1,11 @@
 from SearchEngines.engines import *
-from configure import *
 from multiprocessing import Process
 from Databases.redisClient import RedisClient
+cfg = ConfigLoader().config_dict
 
 
 if __name__ == '__main__':
-    redis = RedisClient(**REDIS)
+    redis = RedisClient(**cfg['redis'])
     torch = TorchSearch(redis)
     haystak = HaystakSearch(redis)
     ahmia = AhmiaSearch(redis)

@@ -4,13 +4,13 @@ root_path = os.path.dirname(os.path.dirname(__file__))
 
 
 def load_keywords():
-    keywords = set()
+    collector = set()
     for filename in os.listdir(os.path.join(root_path, "keywords")):
         fr = open(os.path.join(root_path, "keywords", filename), "r")
         for line in fr.readlines():
-            keywords.add(line.strip())
+            collector.add(line.strip())
         fr.close()
-    return keywords
+    return collector
 
 
 def singleton(cls):

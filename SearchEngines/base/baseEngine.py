@@ -1,12 +1,14 @@
 import requests
 from bs4 import BeautifulSoup
 import re
+import os
 from Databases.redisClient import RedisClient
 from Utils.config_loader import ConfigLoader
 from Utils.logger import Log
 from Utils.utils import load_keywords
 from traceback import format_exc
 from concurrent.futures import ThreadPoolExecutor
+import pickle
 logger = Log().get_log()
 cfg = ConfigLoader().config_dict['main']
 
@@ -15,7 +17,7 @@ class SearchEngine:
     def __init__(self, redis_client: RedisClient):
         self._session = requests.session()
         self.redis_client = redis_client
-        self.tasks = None
+        self.tasks = set()
         self._initialize()
         self.url = None
         self.name = None
@@ -25,15 +27,17 @@ class SearchEngine:
             "http": cfg['tor-proxy']['http'],
             "https": cfg['tor-proxy']['https']
         }
-        self.tasks = load_keywords()
+        self.load_middle_status()
 
     def search(self, keyword):
         collector = set()
         try:
             self._search(keyword, collector)
+            return True
         except Exception as e:
             logger.error(e)
             logger.error(format_exc())
+            return False
         finally:
             logger.info(self.name, keyword, len(collector))
             self._save(collector)
@@ -81,8 +85,24 @@ class SearchEngine:
     def run(self):
         pool = ThreadPoolExecutor(max_workers=4)
         try:
-            for keyword in self.tasks:
+            while len(self.tasks):
+                keyword = self.tasks.pop()
                 pool.submit(self.search, keyword)
         except Exception as e:
             logger.error(e)
             logger.error(format_exc())
+        self.dump_middle_status()
+
+    def dump_middle_status(self):
+        dump_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "temp")
+        os.makedirs(dump_dir, exist_ok=True)
+        if len(self.tasks) != 0:
+            pickle.dump(self.tasks, open(os.path.join(dump_dir, f"{self.name}.pkl"), "wb"))
+
+    def load_middle_status(self):
+        dump_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "temp")
+        middle_filename = os.path.join(dump_dir, f"{self.name}.pkl")
+        if os.path.exists(middle_filename):
+            self.tasks = pickle.load(open(middle_filename, "rb"))
+        else:
+            self.tasks = load_keywords()

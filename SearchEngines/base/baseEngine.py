@@ -2,27 +2,41 @@ import requests
 from bs4 import BeautifulSoup
 import re
 from Databases.redisClient import RedisClient
+from Utils.config_loader import ConfigLoader
+from Utils.logger import Log
+from Utils.utils import load_keywords
+from traceback import format_exc
+from concurrent.futures import ThreadPoolExecutor
+logger = Log().get_log()
+cfg = ConfigLoader().config_dict['main']
 
 
 class SearchEngine:
     def __init__(self, redis_client: RedisClient):
         self._session = requests.session()
         self.redis_client = redis_client
+        self.tasks = None
         self._initialize()
         self.url = None
         self.name = None
 
     def _initialize(self):
         self._session.proxies = {
-            "http": "socks5h://127.0.0.1:9050",
-            "https": "socks5h://127.0.0.1:9050"
+            "http": cfg['tor-proxy']['http'],
+            "https": cfg['tor-proxy']['https']
         }
+        self.tasks = load_keywords()
 
     def search(self, keyword):
         collector = set()
-        self._search(keyword, collector)
-        print(self.name, keyword, len(collector))
-        self._save(collector)
+        try:
+            self._search(keyword, collector)
+        except Exception as e:
+            logger.error(e)
+            logger.error(format_exc())
+        finally:
+            logger.info(self.name, keyword, len(collector))
+            self._save(collector)
 
     def _save(self, collector):
         for domain in collector:
@@ -45,9 +59,9 @@ class SearchEngine:
             except requests.exceptions.ConnectionError:
                 tried += 1
             except Exception as e:
-                print(e)
+                logger.error(e)
                 tried += 1
-        print(self.name, " fail to get ", url, params)
+        logger.warning(self.name, " fail to get ", url, params)
         return None
 
     @staticmethod
@@ -62,8 +76,13 @@ class SearchEngine:
                         if res.group() not in collector:
                             collector.add(res.group())
         except Exception as e:
-            print(e)
+            logger.error(e)
 
-    def run(self, keywords):
-        for keyword in keywords():
-            self.search(keyword)
+    def run(self):
+        pool = ThreadPoolExecutor(max_workers=4)
+        try:
+            for keyword in self.tasks:
+                pool.submit(self.search, keyword)
+        except Exception as e:
+            logger.error(e)
+            logger.error(format_exc())

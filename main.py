@@ -1,7 +1,7 @@
 from SearchEngines.engines import *
-from Utils.utils import load_keywords
 from configure import *
 from multiprocessing import Process
+from Databases.redisClient import RedisClient
 
 
 if __name__ == '__main__':
@@ -10,10 +10,10 @@ if __name__ == '__main__':
     haystak = HaystakSearch(redis)
     ahmia = AhmiaSearch(redis)
     not_evil = NotEvilSearch(redis)
-    threads = []
+    processes = []
     for engine in [torch, haystak, ahmia, not_evil]:
-        t = Process(target=engine.run, args=(load_keywords,))
-        t.start()
-        threads.append(t)
-    for t in threads:
-        t.join()
+        p = Process(target=engine.run)
+        p.start()
+        processes.append(p)
+    for p in processes:
+        p.join()
